@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lartimes.unicom.mapper.UnicomMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.lartimes.unicom.model.po.Unicom">
+        <id column="id" property="id"/>
+        <result column="time_now" property="timeNow"/>
+        <result column="ismi" property="ismi"/>
+        <result column="net" property="net"/>
+        <result column="sex" property="sex"/>
+        <result column="age_weight" property="ageWeight"/>
+        <result column="arpu" property="arpu"/>
+        <result column="brand" property="brand"/>
+        <result column="model" property="model"/>
+        <result column="traffic_weight" property="trafficWeight"/>
+        <result column="call_sum" property="callSum"/>
+        <result column="sms_total" property="smsTotal"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id
+        , time_now, imsi, net, sex, age_weight, arpu, brand,
+          model, traffic_weight, call_sum, sms_total
+    </sql>
+
+</mapper>

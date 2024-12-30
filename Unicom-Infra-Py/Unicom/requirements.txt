@@ -1,0 +1,7 @@
+﻿os
+pandas
+numpy
+matplotlib
+pymysql
+codecs
+datetime
