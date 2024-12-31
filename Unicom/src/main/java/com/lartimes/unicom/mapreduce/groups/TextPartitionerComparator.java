@@ -17,8 +17,8 @@ public class TextPartitionerComparator extends WritableComparator {
 
     @Override
     public int compare(WritableComparable a, WritableComparable b) {
-        Text key1 = (Text) a;
-        Text key2 = (Text) b;
+        String key1 = a.toString();
+        String key2 = b.toString();
         return key1.compareTo(key2);
     }
 }

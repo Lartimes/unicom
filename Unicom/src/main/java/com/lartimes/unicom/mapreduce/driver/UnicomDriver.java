@@ -1,6 +1,7 @@
 package com.lartimes.unicom.mapreduce.driver;
 
 import com.lartimes.unicom.mapreduce.groups.TextPartitionerComparator;
+import com.lartimes.unicom.mapreduce.groups.UnicomGroupByIMSI;
 import com.lartimes.unicom.mapreduce.mr.UnicomMapper;
 import com.lartimes.unicom.mapreduce.mr.UnicomReducer;
 import org.apache.hadoop.conf.Configuration;
@@ -39,15 +40,19 @@ public class UnicomDriver extends Configured implements Tool {
         job.setJarByClass(this.getClass());
 
         //设置Map /Reduce 类
-        job.setGroupingComparatorClass(TextPartitionerComparator.class);
+
         job.setMapperClass(UnicomMapper.class);
         job.setReducerClass(UnicomReducer.class);
+
+        job.setPartitionerClass(UnicomGroupByIMSI.class);
+        job.setGroupingComparatorClass(TextPartitionerComparator.class);
+        job.setNumReduceTasks(3);
 
 //       设置map阶段输出类型
         job.setMapOutputKeyClass(Text.class);
         job.setMapOutputValueClass(Text.class);
-//        job.setNumReduceTasks(5);
-//        job.setPartitionerClass(UnicomGroupByIMSI.class);
+
+
 //        设置reduce输出类型
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(NullWritable.class);
