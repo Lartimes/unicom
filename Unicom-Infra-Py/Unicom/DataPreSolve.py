@@ -153,6 +153,8 @@ class DataPreSolve:
                 df.dropna(subset=['IMSI'], inplace=True)
                 df['网别'].fillna('3G', inplace=True)
                 df['性别'].fillna('男', inplace=True)
+                df['终端型号'] = df['型号'].str.replace(' ', '').str.replace(',', '|')
+                #TODO 型号 这里需要将，转换为 |
 
                 # map存入 修改过的数据 ，迭代下去，不会回滚再次向前读取
                 # for row in df.itertuples(index=True):
@@ -184,6 +186,7 @@ class DataPreSolve:
                 #     df.at[row.Index, '短信条数'] = fill_max_mean(row, '短信条数') if pd.isna(
                 #         getattr(row, '短信条数')) else getattr(row, '短信条数')
                 df = df[df['年龄值段'] != '未知']
+                # TODO 写入新的数据, mapreduce / mysql 都要直接用这个
                 data_batch_insert(str(self.datalist[i])[-len("yyyymm.csv"): -4], df.copy())
 
     def get_data_dic(self):
@@ -217,7 +220,7 @@ def insert_mysql(dict_data):
 
 if __name__ == '__main__':
     dps = DataPreSolve()
-    # dps.code_transform()
+    dps.code_transform()
     # dict_data = dps.get_data_dic()
     # insert_mysql(dict_data)
     dps.data_pre_solve()
