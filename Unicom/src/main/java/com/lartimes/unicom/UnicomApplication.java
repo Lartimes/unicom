@@ -10,12 +10,19 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.io.File;
 import java.util.Objects;
 
 @SpringBootApplication
 
+
+@EnableCaching
+@EnableScheduling
+@ConfigurationPropertiesScan("com.lartimes.unicom.conf")
 @MapperScan(basePackages = "com.lartimes.unicom.mapper")
 public class UnicomApplication implements ApplicationRunner {
 
@@ -31,7 +38,7 @@ public class UnicomApplication implements ApplicationRunner {
         long now = System.currentTimeMillis();
         for (File listFile : Objects.requireNonNull(file.listFiles())) {
             String name = listFile.getName();
-            name = name.substring(4 , name.length() - ".csv".length());
+            name = name.substring(4, name.length() - ".csv".length());
             System.out.println(name);
             CsvNameHolder.set(name);
             UnicomExcelResolverImpl unicomExcelResolver = ExcelSolverParent.unicomExcelResolver;
@@ -39,6 +46,6 @@ public class UnicomApplication implements ApplicationRunner {
         }
         long then = System.currentTimeMillis();
         System.out.print("用时:");
-        System.out.println((then - now) /1000L  );
+        System.out.println((then - now) / 1000L);
     }
 }

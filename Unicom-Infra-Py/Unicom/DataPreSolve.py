@@ -1,11 +1,10 @@
 ﻿import codecs
 import os
-
+import DataPersistence
 import numpy as np
 import pandas as pd
 import pymysql
-
-from Unicom.DataPersistence import data_batch_insert
+from pandas import DataFrame
 
 
 class DataPreSolve:
@@ -50,6 +49,8 @@ class DataPreSolve:
             return self._datalist
 
     def code_transform(self):
+        print("进行转码")
+        print(self.datalist)
         prefix = 'utf-8'
         count = 0
         for data_file in self.datalist:
@@ -66,6 +67,7 @@ class DataPreSolve:
                 pass
         if count == 0:
             return
+        print(self.datalist)
         for data_file in self.datalist:
             file = data_file[:-len('数据大赛20150x.csv'):] + prefix + data_file[-len('数据大赛201501.csv'):]
             try:
@@ -77,6 +79,7 @@ class DataPreSolve:
                 pass
             finally:
                 os.remove(file)
+        print("转码成功")
 
     def get_next_imsi(self, begin: int, ismi: str):
         for i in range(begin, self.solve_num):
@@ -144,17 +147,20 @@ class DataPreSolve:
                 return result[clean_key]
             return row[clean_key]
 
+        tmpDir = "tmp"
         for i in range(self.solve_num):
-            chunksize = 10 ** 4 * 2 # 每块的大小
+            chunksize = 10 ** 4 * 2  # 每块的大小
             chunks = pd.read_csv(self.datalist[i], encoding='utf-8', dtype=self._dtypes, chunksize=chunksize)
+            merge_size = 0
+            if not chunks:
+                continue
             for df in chunks:
-                print(df)
+                # print(df)
                 df.drop_duplicates(inplace=True)
                 df.dropna(subset=['IMSI'], inplace=True)
                 df['网别'].fillna('3G', inplace=True)
                 df['性别'].fillna('男', inplace=True)
-                df['终端型号'] = df['型号'].str.replace(' ', '').str.replace(',', '|')
-                #TODO 型号 这里需要将，转换为 |
+                df['终端型号'] = df['终端型号'].str.replace(' ', '').str.replace(',', '|')
 
                 # map存入 修改过的数据 ，迭代下去，不会回滚再次向前读取
                 # for row in df.itertuples(index=True):
@@ -186,8 +192,17 @@ class DataPreSolve:
                 #     df.at[row.Index, '短信条数'] = fill_max_mean(row, '短信条数') if pd.isna(
                 #         getattr(row, '短信条数')) else getattr(row, '短信条数')
                 df = df[df['年龄值段'] != '未知']
-                # TODO 写入新的数据, mapreduce / mysql 都要直接用这个
-                data_batch_insert(str(self.datalist[i])[-len("yyyymm.csv"): -4], df.copy())
+                copy_df = df.copy()
+                merge_size += 1
+                create_temp(tmpDir, copy_df, str(merge_size))
+                DataPersistence.data_batch_insert(str(self.datalist[i])[-len("yyyymm.csv"): -4], copy_df)
+            #       overwrite
+            print("========")
+            if os.path.exists(self.datalist[i]):
+                print(self.datalist)
+                print("merge_csvs(tmpDir , merge_size , self.datalist[i])")
+                merge_csvs(tmpDir, merge_size, self.datalist[i])
+                # TODO 上传至HDFS 从mysql 导出到sqoop,
 
     def get_data_dic(self):
         # 流量使用量
@@ -204,6 +219,29 @@ class DataPreSolve:
         dict_data['ARPU值段'].remove(np.nan)
         dict_data['年龄值段'].remove('未知')
         return dict_data
+
+
+def create_temp(tmpDir: str, df: DataFrame, sequence: str):
+    tmp = os.path.dirname(__file__) + "\\" + tmpDir
+    os.makedirs(tmp, mode=0o777, exist_ok=True)
+    temp_filename = os.path.join(tmp, sequence + ".csv")
+    print(temp_filename)
+    df.to_csv(temp_filename, index=False, encoding='utf-8-sig')
+
+
+def merge_csvs(tmpDir: str, merge_size: int, dest_path: str):
+    print("========")
+    tmpDir = os.path.dirname(__file__) + "\\" + tmpDir
+    with open(dest_path, 'w', encoding='utf-8') as dest:
+        for i in range(1, merge_size + 1):
+            with open(tmpDir + "\\" + str(i) + ".csv", 'r', encoding='utf-8') as file:
+                tmp = 0
+                for line in file:
+                    tmp += 1
+                    dest.write(line)
+                    if tmp % 5000 == 0:
+                        dest.flush()
+                dest.flush()
 
 
 def insert_mysql(dict_data):
