@@ -41,10 +41,10 @@ public class MysqlReaderMapperV2 extends Mapper<LongWritable, Unicom, NullWritab
             getDate = true;
         }
         String string = new StringJoiner(",").add(String.valueOf(date)).add(unicom.getImsi())
-                .add(unicom.getImsi())
                 .add(unicom.getNet())
                 .add(unicom.getSex())
                 .add(String.valueOf(unicom.getAgeWeight()))
+                .add(String.valueOf(unicom.getArpu()))
                 .add(unicom.getBrand())
                 .add(unicom.getModel())
                 .add(String.valueOf(unicom.getTrafficWeight()))

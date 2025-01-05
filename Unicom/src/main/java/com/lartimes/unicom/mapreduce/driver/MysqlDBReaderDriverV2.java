@@ -39,9 +39,9 @@ public class MysqlDBReaderDriverV2 extends Configured implements Tool {
         final String uri = "hdfs://" + "localhost" + ":" + 8020;
         conf.set("fs.defaultFS", uri);
         FileSystem fileSystem = FileSystem.get(conf);
-        String curDir = System.getProperty("user.dir").replaceAll("\\\\" , "/");
+        String curDir = System.getProperty("user.dir").replaceAll("\\\\", "/");
         System.out.println(curDir);
-        fileSystem.copyFromLocalFile(false , false ,new Path("file:///" +curDir +"/mysql-export/"), new Path(uri + "/mysql-export"));
+        fileSystem.copyFromLocalFile(false, false, new Path("file:///" + curDir + "/mysql-export/"), new Path(uri + "/mysql-export"));
     }
 
     @Override

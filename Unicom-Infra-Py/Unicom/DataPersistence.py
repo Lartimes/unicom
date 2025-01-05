@@ -45,6 +45,7 @@ def get_dict_data():
             elif row['column'] == '年龄值段':
                 age_weight[row['range']] = row['weight']
         connection.close()
+    return traffic_weight, ARPU_weight, age_weight
 
 
 
