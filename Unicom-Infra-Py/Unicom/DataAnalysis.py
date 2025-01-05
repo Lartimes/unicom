@@ -113,12 +113,14 @@ class DataAnalysis:
 
 
 if __name__ == '__main__':
+    # F:\Dev\Unicom-Moniter\Unicom-Moniter\mysql-export\part-r-00001\part-r-00000
     analysis = DataAnalysis()
     pattern = re.compile(r'^part-r-000(0[1-9]|1[0-2])$')
     count = 0
     print(analysis.destDir)
     for filename in os.listdir(analysis.destDir):
         if pattern.match(filename):
+            print(analysis.destDir + "\\" + filename + "\\part-r-00000")
             count += 1
             df = pd.read_csv(analysis.destDir + "\\" + filename + "\\part-r-00000", sep=',',
                              encoding='utf-8', names=analysis.column_names, dtype=analysis.dtypes,
