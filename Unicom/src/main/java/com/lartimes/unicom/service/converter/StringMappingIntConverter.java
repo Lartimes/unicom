@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
@@ -28,17 +29,19 @@ public class StringMappingIntConverter implements Converter<Integer> {
             "arpu", "ARPU值段", "trafficWeight", "流量使用量");
     private static Map<String, Map<String, Integer>> dictionaryMap = Collections.emptyMap();
 
-    //    src/main/resources/dictionary.json
     static {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
+            String parentPath = Objects.requireNonNull(Thread.currentThread().getContextClassLoader().getResource("")).toURI().toString().substring("file:_".length());
             dictionaryMap = objectMapper.readValue(
-                    new File("src/main/resources/dictionary.json"),
+                    new File(parentPath + "dictionary.json"),
                     new TypeReference<Map<String, Map<String, Integer>>>() {
                     }
             );
         } catch (IOException e) {
             log.error(e.getMessage(), e);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
         }
     }
 

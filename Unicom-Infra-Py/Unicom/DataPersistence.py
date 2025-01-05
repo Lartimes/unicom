@@ -47,6 +47,7 @@ def get_dict_data():
         connection.close()
 
 
+
 def data_batch_insert(table: str, df: pd.DataFrame):
     get_dict_data()
     connection = pymysql.connect(host='localhost', user='root', password='307314', db='unicom',

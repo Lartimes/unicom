@@ -202,7 +202,7 @@ class DataPreSolve:
                 print(self.datalist)
                 print("merge_csvs(tmpDir , merge_size , self.datalist[i])")
                 merge_csvs(tmpDir, merge_size, self.datalist[i])
-                # TODO 上传至HDFS 从mysql 导出到sqoop,
+
 
     def get_data_dic(self):
         # 流量使用量

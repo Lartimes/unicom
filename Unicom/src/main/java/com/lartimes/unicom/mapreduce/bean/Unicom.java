@@ -11,7 +11,9 @@ import java.io.Serializable;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 /**
  * @author wüsch
@@ -19,8 +21,19 @@ import java.time.LocalDateTime;
  * @description:
  * @since 2024/12/29 22:11
  */
+
 @Data
 public class Unicom implements Serializable, Writable, DBWritable {
+
+    public String toString() {
+        String var10000 = this.getImsi();
+        return "{'imsi':'" + var10000 + "', " +
+                "'timeNow':'" + this.getTimeNow() +
+                "', 'net':'" + this.getNet() + "', 'sex':'" + this.getSex() +
+                "', 'ageWeight':'" + this.getAgeWeight() + "', 'arpu':'" + this.getArpu() +
+                "', 'brand':'" + this.getBrand() + "', 'model':'" + this.getModel().replaceAll("'" , "")  + "', 'trafficWeight':'" + this.getTrafficWeight() +
+                "', 'callSum':'" + this.getCallSum() + "', 'smsTotal':'" + this.getSmsTotal() + "'}";
+    }
     private String imsi;
     private LocalDateTime timeNow;
     private String net;
@@ -87,7 +100,9 @@ public class Unicom implements Serializable, Writable, DBWritable {
     @Override
     public void readFields(ResultSet rs) throws SQLException {
         this.imsi = rs.getString(1);
-        this.timeNow = LocalDateTime.parse(rs.getString(2));
+        LocalTime localTime = rs.getTime(2).toLocalTime();
+        LocalDate localDate = rs.getDate(2).toLocalDate();
+        this.timeNow = LocalDateTime.of(localDate , localTime);
         this.net = rs.getString(3);
         this.sex = rs.getString(4);
         this.ageWeight = rs.getInt(5);

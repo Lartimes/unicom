@@ -8,7 +8,6 @@ public class UnicomGroupByMonth extends HashPartitioner<Text, Text> {
     public int getPartition(Text k, Text v, int numPartitions) {
 //        System.out.println(k.toString());
         return Integer.parseInt(k.toString().replaceAll("\"" , "")) % 201500;
-
     }
 }
 

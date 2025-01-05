@@ -35,29 +35,34 @@ public class UnicomDriver extends Configured implements Tool {
         System.exit(run);
     }
 
-    @Override
-    public int run(String[] args) throws Exception {
-        Job job = Job.getInstance(getConf(), this.getClass().getSimpleName());
-//        设置程序主类
-        job.setJarByClass(this.getClass());
 
-        //设置Map /Reduce 类
-
-        job.setMapperClass(UnicomGroupCleanMapper.class);
-        job.setReducerClass(UnicomGroupCleanReducer.class);
-
+    public Job job() {
+        try {
+            Job job = Job.getInstance(getConf(), this.getClass().getSimpleName());
+            //        设置程序主类
+            job.setJarByClass(this.getClass());
+            job.setMapperClass(UnicomGroupCleanMapper.class);
+            job.setReducerClass(UnicomGroupCleanReducer.class);
 //        job.setPartitionerClass(UnicomGroupByIMSI.class);
-        job.setGroupingComparatorClass(TextPartitionerComparator.class);
-        job.setNumReduceTasks(3);
+            job.setGroupingComparatorClass(TextPartitionerComparator.class);
+            job.setNumReduceTasks(3);
 
 //       设置map阶段输出类型
-        job.setMapOutputKeyClass(Text.class);
-        job.setMapOutputValueClass(Text.class);
-
-
+            job.setMapOutputKeyClass(Text.class);
+            job.setMapOutputValueClass(Text.class);
 //        设置reduce输出类型
-        job.setOutputKeyClass(Text.class);
-        job.setOutputValueClass(NullWritable.class);
+            job.setOutputKeyClass(Text.class);
+            job.setOutputValueClass(NullWritable.class);
+            return job;
+        }catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    @Override
+    public int run(String[] args) throws Exception {
+        Job job = job();
         Path input = new Path(args[0]);
         Path output = new Path(args[1]);
         TextInputFormat.addInputPath(job, input);
