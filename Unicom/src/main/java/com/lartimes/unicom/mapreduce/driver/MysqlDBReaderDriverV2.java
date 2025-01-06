@@ -2,6 +2,7 @@ package com.lartimes.unicom.mapreduce.driver;
 
 import com.lartimes.unicom.mapreduce.bean.Unicom;
 import com.lartimes.unicom.mapreduce.mr.MysqlReaderMapperV2;
+import lombok.SneakyThrows;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.FileSystem;
@@ -16,7 +17,9 @@ import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.Objects;
 
 /**
@@ -29,19 +32,34 @@ import java.util.Objects;
  */
 @Service
 public class MysqlDBReaderDriverV2 extends Configured implements Tool {
-    public static void main(String[] args) throws Exception {
-        System.setProperty("HADOOP_USER_NAME", "root");
+
+    @SneakyThrows
+    public void doReader() {
         Configuration conf = new Configuration();
+        long now = System.currentTimeMillis();
         for (int i = 201501; i <= 201512; i++) {
-            int status = ToolRunner.run(conf, new MysqlDBReaderDriverV2(), new String[]{String.valueOf(i)});
+            int status = ToolRunner.run(conf, this, new String[]{String.valueOf(i)});
             System.out.println(status == 0 ? "SUCCESS" : "FAIL");
         }
+        long then = System.currentTimeMillis();
+        System.out.print("用时:");
+        System.out.println((then - now) / 1000L);
         final String uri = "hdfs://" + "localhost" + ":" + 8020;
-        conf.set("fs.defaultFS", uri);
-        FileSystem fileSystem = FileSystem.get(conf);
+        conf.set("dfs.client.use.datanode.hostname", "true");//添加此配置信息即可
+        FileSystem fs = FileSystem.get(new URI(uri), conf, "root");
         String curDir = System.getProperty("user.dir").replaceAll("\\\\", "/");
-        System.out.println(curDir);
-        fileSystem.copyFromLocalFile(false, false, new Path("file:///" + curDir + "/mysql-export/"), new Path(uri + "/mysql-export"));
+        File[] files = new File(curDir + "/mysql-export").listFiles();
+        for (File file : files) {
+            if (file.isDirectory()) {
+                String name = file.getName();
+                for (File listFile : file.listFiles()) {
+                    if ("part-r-00000".equals(listFile.getName())) {
+                        listFile.renameTo(new File(curDir + "/mysql-export/" + name));
+                    }
+                }
+            }
+        }
+        fs.copyFromLocalFile(false, false, new Path("file:///" + curDir + "/mysql-export"), new Path(uri + "/mysql-export"));
     }
 
     @Override
@@ -71,7 +89,7 @@ public class MysqlDBReaderDriverV2 extends Configured implements Tool {
         DBInputFormat.setInput(
                 job,
                 Unicom.class,
-                "SELECT  imsi , time_now ,net ,sex ,age_weight , arpu , brand , model , traffic_weight , call_sum , sms_total from unicom_201501",
+                "SELECT  imsi , time_now ,net ,sex ,age_weight , arpu , brand , model , traffic_weight , call_sum , sms_total from unicom_" + args[0],
                 "SELECT count(id) from unicom_" + args[0]
         );
         job.waitForCompletion(true);

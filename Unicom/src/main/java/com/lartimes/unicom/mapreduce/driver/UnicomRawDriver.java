@@ -3,6 +3,7 @@ package com.lartimes.unicom.mapreduce.driver;
 import com.lartimes.unicom.mapreduce.groups.UnicomGroupByMonth;
 import com.lartimes.unicom.mapreduce.mr.UnicomGroupToRawMapper;
 import com.lartimes.unicom.mapreduce.mr.UnicomGroupToRawReducer;
+import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
@@ -15,16 +16,25 @@ import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
+import org.springframework.stereotype.Service;
 
 import java.io.File;
 
+@Service
 public class UnicomRawDriver extends Configured implements Tool {
     public static void main(String[] args) throws Exception {
         Configuration conf = new Configuration();
         conf.set("mapreduce.framework.name", "local");
-
-        int run = ToolRunner.run(conf, new UnicomRawDriver(), args);
+        int run = ToolRunner.run(conf, new UnicomRawDriver(), new String[]{"replace_data" , "replace_latest_data"});
         System.exit(run);
+    }
+
+    @SneakyThrows
+    public int doJob(String[] args) {
+        Configuration conf = new Configuration();
+        conf.set("mapreduce.framework.name", "local");
+        int run = ToolRunner.run(conf, this, args);
+        return run;
     }
 
     public Job job() {

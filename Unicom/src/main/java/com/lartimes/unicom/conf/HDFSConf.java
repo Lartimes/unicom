@@ -35,6 +35,7 @@ public class HDFSConf {
     @Bean
     @SneakyThrows
     public FileSystem fileSystem() {
+        System.setProperty("HADOOP_USER_NAME", "root");
         conf = new org.apache.hadoop.conf.Configuration();
         final String uri = "hdfs://" + hostname + ":" + port;
         conf.set("fs.defaultFS", uri);

@@ -1,10 +1,12 @@
 ﻿import codecs
 import os
-import DataPersistence
+
 import numpy as np
 import pandas as pd
 import pymysql
 from pandas import DataFrame
+
+import DataPersistence
 
 
 class DataPreSolve:
@@ -150,59 +152,65 @@ class DataPreSolve:
         tmpDir = "tmp"
         for i in range(self.solve_num):
             chunksize = 10 ** 4 * 2  # 每块的大小
-            chunks = pd.read_csv(self.datalist[i], encoding='utf-8', dtype=self._dtypes, chunksize=chunksize)
             merge_size = 0
-            if not chunks:
-                continue
-            for df in chunks:
-                # print(df)
-                df.drop_duplicates(inplace=True)
-                df.dropna(subset=['IMSI'], inplace=True)
-                df['网别'].fillna('3G', inplace=True)
-                df['性别'].fillna('男', inplace=True)
-                df['终端型号'] = df['终端型号'].str.replace(' ', '').str.replace(',', '|')
-
-                # map存入 修改过的数据 ，迭代下去，不会回滚再次向前读取
-                # for row in df.itertuples(index=True):
-                #     df.at[row.Index, '性别'] = clean_package(row, '性别') if str(
-                #         getattr(row, '性别')) == '不详' or pd.isna(getattr(row, '性别')) else getattr(row, '性别')
-                #     #  print("性别clean success")
-                #     # df['性别'] = df.swifter.apply(
-                #     #     lambda row: clean_package(row, '性别') if row['性别'] == '不详' else row['性别'], axis=1)
-                #
-                #     df.at[row.Index, '年龄值段'] = clean_package(row, '年龄值段') if pd.isna(
-                #         getattr(row, '年龄值段')) or str(getattr(row, '年龄值段')) == '未知' else getattr(row,
-                #                                                                                           '年龄值段')
-                #
-                #     df.at[row.Index, '终端品牌'] = clean_package(row, '终端品牌') if pd.isna(
-                #         getattr(row, '终端品牌')) else getattr(row, '终端品牌')
-                #
-                #     df.at[row.Index, '终端型号'] = clean_package(row, '终端型号') if pd.isna(
-                #         getattr(row, '终端型号')) else getattr(row, '终端型号')
-                #
-                #     df.at[row.Index, 'ARPU值段'] = fill_max_mean(row, 'ARPU值段') if pd.isna(
-                #         getattr(row, 'ARPU值段')) else getattr(row, 'ARPU值段')
-                #
-                #     df.at[row.Index, '流量使用量'] = fill_max_mean(row, '流量使用量') if pd.isna(
-                #         getattr(row, '流量使用量')) else getattr(row, '流量使用量')
-                #
-                #     df.at[row.Index, '语音通话时长'] = fill_max_mean(row, '语音通话时长') if pd.isna(
-                #         getattr(row, '语音通话时长')) else getattr(row, '语音通话时长')
-                #
-                #     df.at[row.Index, '短信条数'] = fill_max_mean(row, '短信条数') if pd.isna(
-                #         getattr(row, '短信条数')) else getattr(row, '短信条数')
-                df = df[df['年龄值段'] != '未知']
-                copy_df = df.copy()
-                merge_size += 1
-                create_temp(tmpDir, copy_df, str(merge_size))
-                DataPersistence.data_batch_insert(str(self.datalist[i])[-len("yyyymm.csv"): -4], copy_df)
-            #       overwrite
-            print("========")
+            for chunk in pd.read_csv(self.datalist[i], encoding='utf-8', chunksize=chunksize):
+                try:
+                    df = chunk.copy()
+                    df['语音通话时长'] = pd.to_numeric(df['语音通话时长'], errors='coerce')
+                    df['短信条数'] = pd.to_numeric(df['短信条数'], errors='coerce')
+                    df['语音通话时长'].fillna(0, inplace=True)
+                    df['短信条数'].fillna(0, inplace=True)
+                    df['语音通话时长'] = df['语音通话时长'].astype('int')
+                    df['短信条数'] = df['短信条数'].astype('int')
+                    # print(df)
+                    df.drop_duplicates(inplace=True)
+                    df.dropna(subset=['IMSI'], inplace=True)
+                    df['网别'].fillna('3G', inplace=True)
+                    df['性别'].fillna('男', inplace=True)
+                    df['终端型号'] = df['终端型号'].str.replace(' ', '').str.replace(',', '|')
+                    # map存入 修改过的数据 ，迭代下去，不会回滚再次向前读取
+                    # for row in df.itertuples(index=True):
+                    #     df.at[row.Index, '性别'] = clean_package(row, '性别') if str(
+                    #         getattr(row, '性别')) == '不详' or pd.isna(getattr(row, '性别')) else getattr(row, '性别')
+                    #     #  print("性别clean success")
+                    #     # df['性别'] = df.swifter.apply(
+                    #     #     lambda row: clean_package(row, '性别') if row['性别'] == '不详' else row['性别'], axis=1)
+                    #
+                    #     df.at[row.Index, '年龄值段'] = clean_package(row, '年龄值段') if pd.isna(
+                    #         getattr(row, '年龄值段')) or str(getattr(row, '年龄值段')) == '未知' else getattr(row,
+                    #                                                                                           '年龄值段')
+                    #
+                    #     df.at[row.Index, '终端品牌'] = clean_package(row, '终端品牌') if pd.isna(
+                    #         getattr(row, '终端品牌')) else getattr(row, '终端品牌')
+                    #
+                    #     df.at[row.Index, '终端型号'] = clean_package(row, '终端型号') if pd.isna(
+                    #         getattr(row, '终端型号')) else getattr(row, '终端型号')
+                    #
+                    #     df.at[row.Index, 'ARPU值段'] = fill_max_mean(row, 'ARPU值段') if pd.isna(
+                    #         getattr(row, 'ARPU值段')) else getattr(row, 'ARPU值段')
+                    #
+                    #     df.at[row.Index, '流量使用量'] = fill_max_mean(row, '流量使用量') if pd.isna(
+                    #         getattr(row, '流量使用量')) else getattr(row, '流量使用量')
+                    #
+                    #     df.at[row.Index, '语音通话时长'] = fill_max_mean(row, '语音通话时长') if pd.isna(
+                    #         getattr(row, '语音通话时长')) else getattr(row, '语音通话时长')
+                    #
+                    #     df.at[row.Index, '短信条数'] = fill_max_mean(row, '短信条数') if pd.isna(
+                    #         getattr(row, '短信条数')) else getattr(row, '短信条数')
+                    df = df[df['年龄值段'] != '未知']
+                    copy_df = df.copy()
+                    merge_size += 1
+                    create_temp(tmpDir, copy_df, str(merge_size))
+                    DataPersistence.data_batch_insert(str(self.datalist[i])[-len("yyyymm.csv"): -4], copy_df)
+                except:
+                    exit(555)
+                #       overwrite
             if os.path.exists(self.datalist[i]):
+                print("========================================")
+                print(merge_size)
                 print(self.datalist)
-                print("merge_csvs(tmpDir , merge_size , self.datalist[i])")
+                print("merge_csvs(tmpDir , merge_size ", self.datalist[i])
                 merge_csvs(tmpDir, merge_size, self.datalist[i])
-
 
     def get_data_dic(self):
         # 流量使用量
@@ -210,14 +218,13 @@ class DataPreSolve:
         # 年龄值段
         dict_data = {'流量使用量': set(), 'ARPU值段': set(), '年龄值段': set()}
         for i in range(self.header_num):
-            df = pd.read_csv(self.datalist[i], encoding='utf-8', dtype=self._dtypes)
+            df = pd.read_csv(self.datalist[i], encoding='utf-8')
             for row in df.itertuples(index=True):
                 for key in dict_data.keys():
                     dict_data[key].add(getattr(row, key))
 
-        dict_data['流量使用量'].remove(np.nan)
-        dict_data['ARPU值段'].remove(np.nan)
-        dict_data['年龄值段'].remove('未知')
+            dict_data['流量使用量'].remove(np.nan)
+            dict_data['ARPU值段'].remove(np.nan)
         return dict_data
 
 
@@ -260,5 +267,6 @@ if __name__ == '__main__':
     dps = DataPreSolve()
     dps.code_transform()
     # dict_data = dps.get_data_dic()
-    # insert_mysql(dict_data)
+    # print(dict_data)
+    # insert_mysql(dict_data)直插入一次
     dps.data_pre_solve()

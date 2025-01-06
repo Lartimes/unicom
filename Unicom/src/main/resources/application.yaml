@@ -20,3 +20,12 @@ server:
   port: 314
 
 
+#
+hadoop:
+  hdfs:
+    hostname: localhost
+    port: 8020
+    username: root
+hbase:
+  addr: localhost:60000
+

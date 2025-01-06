@@ -21,16 +21,24 @@ import java.net.URISyntaxException;
  */
 @Service
 public class UnicomCleanJobs {
-    public static void main(String[] args) throws IOException, URISyntaxException, InterruptedException {
-        UnicomCleanJobs unicomCleanJobs = new UnicomCleanJobs();
-        unicomCleanJobs.cleanJobs("data", "data-out", "clean_data");
+    private final UnicomDriver unicomDriver;
+    private final UnicomRawDriver unicomRawDriver;
+
+    public UnicomCleanJobs(UnicomDriver unicomDriver, UnicomRawDriver unicomRawDriver) {
+        this.unicomDriver = unicomDriver;
+        this.unicomRawDriver = unicomRawDriver;
     }
 
+    public static void main(String[] args) throws IOException, URISyntaxException, InterruptedException {
+//        UnicomCleanJobs unicomCleanJobs = new UnicomCleanJobs();
+//        unicomCleanJobs.cleanJobs("data", "data-out", "clean_data");
+    }
 
     public void cleanJobs(String inputPath, String outputPath, String outputPath2) {
+        inputPath = "data";
+        outputPath = "data-out";
+        outputPath2 = "clean_data";
         try {
-            UnicomDriver unicomDriver = new UnicomDriver();
-            UnicomRawDriver unicomRawDriver = new UnicomRawDriver();
             Configuration conf = new Configuration();
             conf.set("mapreduce.framework.name", "local");
             unicomRawDriver.setConf(conf);

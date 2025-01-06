@@ -21,6 +21,7 @@ import org.apache.hadoop.util.ToolRunner;
  * @since 2024/3/5 22:57
  */
 public class MysqlDBReaderDriverV1 extends Configured implements Tool {
+
     public static void main(String[] args) throws Exception {
         System.setProperty("HADOOP_USER_NAME", "root");
         Configuration conf = new Configuration();
