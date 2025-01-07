@@ -1,9 +1,11 @@
 import os
 import re
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from pandas import DataFrame
+from pylab import mpl
 from sklearn.cluster import KMeans
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
@@ -11,11 +13,14 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
 from Unicom.DataAnalysis import DataAnalysis
-from pylab import mpl
+
 # 设置显示中文字体
 mpl.rcParams["font.sans-serif"] = ["SimHei"]
+
+
 def round_floats(lst):
     return [round(num, 2) for num in lst]
+
 
 class DataMining:
     # 挖掘
@@ -25,13 +30,11 @@ class DataMining:
     # 4.用户换机时间预测？
     # lstm + transformer  模型
 
-
     # ['月份', 'IMSI', '网别',
     #                               '性别', '年龄值段', 'ARPU值段',
     #                               '终端品牌', '终端型号', '流量使用量', '语音通话时长',
     #                               '短信条数']
-    def draw_phone_replace(self , data ):
-
+    def draw_phone_replace(self, data):
         x_values = list(data.keys())
         y1_values = round_floats([float(data[x]['不换手机的权重消费值']) for x in x_values])
         y2_values = round_floats([float(data[x]['换手机的权重消费值']) for x in x_values])
@@ -53,6 +56,7 @@ class DataMining:
         ax.set_ylim(0, 1)
 
         plt.show()
+
     # 刚换手机的最近俩月消费更多
     def phone_replace_consume_more(self, df: DataFrame):
         #    201501,decf8f2fffff42b4746b6bd02d10dd23,2G,男,6,1,None,None,1,0,0

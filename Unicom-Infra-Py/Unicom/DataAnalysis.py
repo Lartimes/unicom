@@ -1,13 +1,18 @@
 # py 只做一些简单数据分析
 import os
 import re
+
 import pandas as pd
 from pandas import DataFrame
+
 from DataPersistence import get_dict_data
+
+
 # ​		手机品牌销量占比
 # ​		年龄分布
 # ​		性别占比
 # ​		网段占比和趋势
+
 class DataAnalysis:
     percentage_map = {'网别': {'a': 25},
                       '性别': {'a': 25},
@@ -15,6 +20,10 @@ class DataAnalysis:
                       '终端品牌': {'a': 25},
 
                       }
+    a = 0
+    b = 0
+    c = 0
+    d = 0
     net_month_data = {1: {}}
 
     def __init__(self):
@@ -41,6 +50,8 @@ class DataAnalysis:
         self.ARPU_weight = {value: key for key, value in dict_data[1].items()}
 
     def package(self, df: DataFrame):
+        print(df['语音通话时长'].max())
+        print(df['短信条数'].max())
         self.get_sex_percentage(df)
         self.get_age_percentage(df)
         self.get_phone_brand_percentage(df)
@@ -74,6 +85,13 @@ class DataAnalysis:
         del self.percentage_map['网别']['a']
 
     def get_monthly_net_percentage(self, df: DataFrame, year_month: int):
+        # self.a += df['流量使用量'].mean()
+        self.a += df['流量使用量'].mode()[0]
+        # self.b += df['语音通话时长'].mean()
+        self.b += df['语音通话时长'].mode()[0]
+        self.c += df['ARPU值段'].mean()
+        self.d += df['短信条数'].mean()
+
         sum_rows = df.shape[0]
         net_count = df[df['网别'] == '3G'].shape[0]
         if year_month not in self.net_month_data:
@@ -120,9 +138,9 @@ if __name__ == '__main__':
     print(analysis.destDir)
     for filename in os.listdir(analysis.destDir):
         if pattern.match(filename):
-            print(analysis.destDir + "\\" + filename + "\\part-r-00000")
+            print(analysis.destDir + "\\" + filename)
             count += 1
-            df = pd.read_csv(analysis.destDir + "\\" + filename + "\\part-r-00000", sep=',',
+            df = pd.read_csv(analysis.destDir + "\\" + filename, sep=',',
                              encoding='utf-8', names=analysis.column_names, dtype=analysis.dtypes,
                              on_bad_lines="skip")
             if count == 1:
@@ -130,7 +148,10 @@ if __name__ == '__main__':
             analysis.get_monthly_net_percentage(df, int(filename[-2:]))
     print(analysis.percentage_map)
     print(analysis.net_month_data)
-
+    print(analysis.a / 12)
+    print(analysis.b / 12)
+    print(analysis.c / 12)
+    print(analysis.d / 12)
 # 数据挖掘
 #     网频的不同 --- arpu 怎么样？ 流量使用量 ?  ..
 #

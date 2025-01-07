@@ -15,12 +15,10 @@
     <description>Unicom</description>
 
     <properties>
-        <java.version>17</java.version>
+        <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <hbase-spring-boot>1.0.0.RELEASE</hbase-spring-boot>
     </properties>
-
     <dependencies>
 <!--        git clone https://github.com/SpringForAll/spring-boot-starter-hbase.git-->
 <!--        <dependency>-->
@@ -106,6 +104,9 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
+
+
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-hdfs</artifactId>
@@ -140,5 +141,4 @@
             <version>1.6.3</version>
         </dependency>
     </dependencies>
-
 </project>

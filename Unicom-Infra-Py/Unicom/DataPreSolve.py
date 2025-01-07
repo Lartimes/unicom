@@ -268,5 +268,5 @@ if __name__ == '__main__':
     dps.code_transform()
     # dict_data = dps.get_data_dic()
     # print(dict_data)
-    # insert_mysql(dict_data)直插入一次
+    # insert_mysql(dict_data)
     dps.data_pre_solve()

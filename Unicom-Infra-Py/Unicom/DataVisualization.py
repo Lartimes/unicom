@@ -14,6 +14,9 @@ mpl.rcParams["font.sans-serif"] = ["SimHei"]
 #                               '性别', '年龄值段', 'ARPU值段',
 #                               '终端品牌', '终端型号', '流量使用量', '语音通话时长',
 #                               '短信条数']
+
+
+
 # 201501,decf8f2fffff42b4746b6bd02d10dd23,2G,男,6,1,None,None,1,0,0
 # 201501,decf8f2fffff42b4746b6bd02d10dd23,2G,男, 6 , 1 ,None,None,1,0,0
 # 可以看到arpu高 通话时间越来越高
@@ -63,7 +66,7 @@ def draw_arpu_scatter(df: DataFrame):
 
 if __name__ == '__main__':
     a = DataAnalysis()
-    df = pd.read_csv("F:/Dev/Unicom-Moniter/Unicom-Moniter/mysql-export/part-r-00001/part-r-00000", sep=',',
+    df = pd.read_csv("F:/Dev/Unicom-Moniter/Unicom-Moniter/mysql-export/part-r-00001/", sep=',',
                      encoding='utf-8', names=a.column_names, dtype=a.dtypes,
                      on_bad_lines="skip")
     draw_arpu_scatter(df)

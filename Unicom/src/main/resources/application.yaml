@@ -27,5 +27,5 @@ hadoop:
     port: 8020
     username: root
 hbase:
-  addr: localhost:60000
+  addr: hadoop1:60000
 

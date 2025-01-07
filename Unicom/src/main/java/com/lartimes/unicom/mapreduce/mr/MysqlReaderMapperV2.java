@@ -35,23 +35,24 @@ public class MysqlReaderMapperV2 extends Mapper<LongWritable, Unicom, NullWritab
         LocalDateTime timeNow = unicom.getTimeNow();
         int monthValue = timeNow.getMonthValue();
         if (arr[monthValue - 1] == null) {
-            arr[monthValue -1] = new LongAdder();
+            arr[monthValue - 1] = new LongAdder();
             int year = timeNow.getYear();
             arr[monthValue - 1].add(year * 100L + monthValue);
-            System.err.println("=============");
             System.out.println(Arrays.toString(arr));
+
+            String string = new StringJoiner(",").add(String.valueOf(arr[monthValue - 1].intValue())).add(unicom.getImsi())
+                    .add(unicom.getNet())
+                    .add(unicom.getSex())
+                    .add(String.valueOf(unicom.getAgeWeight()))
+                    .add(String.valueOf(unicom.getArpu()))
+                    .add(unicom.getBrand())
+                    .add(unicom.getModel())
+                    .add(String.valueOf(unicom.getTrafficWeight()))
+                    .add(String.valueOf(unicom.getCallSum()))
+                    .add(String.valueOf(unicom.getSmsTotal())).toString();
+            outValue.set(string);
+            context.write(outKey, outValue);
         }
-        String string = new StringJoiner(",").add(String.valueOf(arr[monthValue-1].intValue())).add(unicom.getImsi())
-                .add(unicom.getNet())
-                .add(unicom.getSex())
-                .add(String.valueOf(unicom.getAgeWeight()))
-                .add(String.valueOf(unicom.getArpu()))
-                .add(unicom.getBrand())
-                .add(unicom.getModel())
-                .add(String.valueOf(unicom.getTrafficWeight()))
-                .add(String.valueOf(unicom.getCallSum()))
-                .add(String.valueOf(unicom.getSmsTotal())).toString();
-        outValue.set(string);
-        context.write(outKey, outValue);
     }
+
 }

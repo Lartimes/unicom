@@ -48,7 +48,7 @@ public class UnicomRawDriver extends Configured implements Tool {
             job.setPartitionerClass(UnicomGroupByMonth.class);
             job.setOutputKeyClass(Text.class);
             job.setOutputValueClass(NullWritable.class);
-            job.setNumReduceTasks(13);
+            job.setNumReduceTasks(14);
             return job;
         } catch (Exception e) {
             throw new RuntimeException(e);

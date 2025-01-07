@@ -25,6 +25,7 @@ public class UnicomReplaceReducer extends Reducer<Text, Text, Text, NullWritable
     private final int length = "yyyyMM".length();
     private final Text outKey = new Text();
     private final NullWritable nullWritable = NullWritable.get();
+
     @Override
     protected void reduce(Text key, Iterable<Text> values, Reducer<Text, Text, Text, NullWritable>.Context context) throws IOException, InterruptedException {
         List<String> parallelList = StreamSupport.stream(
@@ -44,21 +45,22 @@ public class UnicomReplaceReducer extends Reducer<Text, Text, Text, NullWritable
 //201501,588c1c909a42df092fd9f6b0793091fe,2G,男,6,1,LG,LG-P503,1,0,0
         String newModel = null;
         outKey.set((str + ",0"));
-        context.write(outKey , nullWritable);
-        while (right < length -1) {
-            right ++ ;
+        String last_change = str.substring(0, this.length);
+        while (right < length ) {
             String s = parallelList.get(right);
             model = str.split(",")[7];
             newModel = s.split(",")[7];
-            if(!model.equals(newModel)) {
-                outKey.set(s + ",1"); //换手机
-                context.write(outKey , nullWritable);
+            if (!model.equals(newModel)) {
+                last_change = s.substring(0, this.length);
+                outKey.set(s + ",1" + "," + last_change); //换手机
+                context.write(outKey, nullWritable);
                 left = right;
                 str = parallelList.get(left);
-            }else {
-                outKey.set(s + ",0");
-                context.write(outKey , nullWritable);
+            } else {
+                outKey.set(s + ",0" + "," + last_change);
+                context.write(outKey, nullWritable);
             }
+            right++;
         }
     }
 }

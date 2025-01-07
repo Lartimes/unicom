@@ -1,10 +1,11 @@
 package com.lartimes.unicom;
 
 import com.lartimes.unicom.mapreduce.driver.MysqlDBReaderDriverV2;
-import com.lartimes.unicom.mapreduce.driver.UnicomCleanJobs;
+import com.lartimes.unicom.mapreduce.driver.UnicomGroupDriver;
+import com.lartimes.unicom.mapreduce.jobs.UnicomCleanJobs;
 import com.lartimes.unicom.mapreduce.driver.UnicomDriver;
-import com.lartimes.unicom.mapreduce.driver.UnicomPhoneReplaceJobs;
-import org.apache.hadoop.hbase.client.Connection;
+import com.lartimes.unicom.mapreduce.jobs.UnicomPhoneReplaceJobs;
+import com.lartimes.unicom.utils.HBaseUtils;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -36,7 +37,10 @@ public class UnicomApplication implements ApplicationRunner {
     private UnicomPhoneReplaceJobs unicomPhoneReplaceJobs;
 
     @Autowired
-    private Connection hBaseConf;
+    private HBaseUtils hBaseUtils;
+
+    @Autowired
+    private UnicomGroupDriver unicomGroupDriver;
 
     public static void main(String[] args) {
         SpringApplication.run(UnicomApplication.class, args);
@@ -44,12 +48,12 @@ public class UnicomApplication implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-//        不知什么原因？ spring管理之后好像时间变长了
 //        int i = unicomDriver.doJob(null);
 //        System.out.println(i);
 //        mysqlDBReaderDriverV2.doReader();
+        unicomGroupDriver.doJob(null);
 //        unicomPhoneReplaceJobs.cleanJobs(null , null , null);
-        System.out.println(hBaseConf);
+//        hBaseUtils.batchInsert();
 //        unicomCleanJobs.cleanJobs(null , null , null);
 //        File file = new File("data");
 //        long now = System.currentTimeMillis();
