@@ -152,6 +152,7 @@ if __name__ == '__main__':
     print(analysis.b / 12)
     print(analysis.c / 12)
     print(analysis.d / 12)
+
 # 数据挖掘
 #     网频的不同 --- arpu 怎么样？ 流量使用量 ?  ..
 #

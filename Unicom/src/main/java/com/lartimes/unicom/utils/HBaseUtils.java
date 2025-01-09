@@ -35,8 +35,6 @@ public class HBaseUtils {
     @Autowired
     private Connection connection;
 
-
-
     //    进行插入 根据行插入
 //    根据行键查询
     @SneakyThrows

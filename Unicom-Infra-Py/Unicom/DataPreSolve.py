@@ -1,13 +1,10 @@
 ﻿import codecs
 import os
-
 import numpy as np
 import pandas as pd
 import pymysql
 from pandas import DataFrame
-
 import DataPersistence
-
 
 class DataPreSolve:
     def __init__(self):
@@ -265,8 +262,8 @@ def insert_mysql(dict_data):
 
 if __name__ == '__main__':
     dps = DataPreSolve()
-    dps.code_transform()
-    # dict_data = dps.get_data_dic()
+    dps.code_transform() #转码
+    # dict_data = dps.get_data_dic()  #提取数据字典
     # print(dict_data)
-    # insert_mysql(dict_data)
-    dps.data_pre_solve()
+    # insert_mysql(dict_data) #插入MySQL 映射提供预处理之后的插入操作
+    # dps.data_pre_solve() #进行清洗和存储MySQL

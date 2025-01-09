@@ -20,7 +20,6 @@ import java.util.Objects;
 @Service
 @Slf4j
 public class ExcelSolver {
-//    map + strategy 后续再更改代码，目前先完成
 
     /**
      * @param dir csv 目录
@@ -32,14 +31,16 @@ public class ExcelSolver {
             log.error("不存在该目录");
             return;
         }
+        //    map + strategy 后续再更改代码，目前先完成
 //        这里截取table 名字也需要动态引入， 策略模式等
-//        线程池 ， future ，异步等
+//       TODO 线程池 ， future ，异步等
 //        使用回调机制 /使用 CompletableFuture 不显示等待结果
         for (File listFile : Objects.requireNonNull(file.listFiles())) {
             String name = listFile.getName();
             name = name.substring(4, name.length() - ".csv".length());
-            CsvNameHolder.set(name);
+            CsvNameHolder.set(name); //ThreadLocal截取日期
             FastExcel.read(listFile, ExcelUnicom.class, unicomExcelResolver).sheet().doRead();
+            //进行处理映射逻辑
         }
 
     }

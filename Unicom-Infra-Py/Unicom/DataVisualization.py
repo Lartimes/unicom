@@ -14,12 +14,9 @@ mpl.rcParams["font.sans-serif"] = ["SimHei"]
 #                               '性别', '年龄值段', 'ARPU值段',
 #                               '终端品牌', '终端型号', '流量使用量', '语音通话时长',
 #                               '短信条数']
-
-
-
 # 201501,decf8f2fffff42b4746b6bd02d10dd23,2G,男,6,1,None,None,1,0,0
 # 201501,decf8f2fffff42b4746b6bd02d10dd23,2G,男, 6 , 1 ,None,None,1,0,0
-# 可以看到arpu高 通话时间越来越高
+# 可以看到arpu高 通话时间/越来越高
 # 这两个可以进行挖掘是否存在关系
 # TODO : 聚类分析或者 JAVABean Redis MapReduce 对这些用户实体分析
 def draw_arpu_scatter(df: DataFrame):
@@ -28,6 +25,51 @@ def draw_arpu_scatter(df: DataFrame):
     ax1.set_xlabel('ARPU值段')
     ax1.set_ylabel('流量使用量', color=color1)
     min = df['流量使用量'].min()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     max = df['流量使用量'].max()
     print(max)
     ax1.set_ylim(min, max)
@@ -57,10 +99,7 @@ def draw_arpu_scatter(df: DataFrame):
     plt.show()
     correlation, p_value = pearsonr(df['ARPU值段'], df['语音通话时长'])
     print(f"Pearson相关系数: {correlation}")
-    print(f"P值: {p_value}")
     # Pearson相关系数: 0.5915579685655854
-    # P值: 0.0
-
 
 
 
