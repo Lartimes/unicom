@@ -20,6 +20,10 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
     <dependencies>
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+        </dependency>
 <!--        git clone https://github.com/SpringForAll/spring-boot-starter-hbase.git-->
 <!--        <dependency>-->
 <!--            <groupId>org.springframework.boot</groupId>-->

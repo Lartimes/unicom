@@ -1,0 +1,245 @@
+services:
+  # ZooKeeper 集群
+  zk1:
+    networks:
+      hadoop-net:
+        ipv4_address: 172.30.0.5
+    image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/zookeeper:latest
+    container_name: zk1
+    ports:
+      - "2181:2181"  
+      - "2888:2888"  
+      - "3888:3888"  
+    environment:
+      - ZOO_MY_ID=1
+      - ZOO_SERVERS=server.1=zk1:2888:3888;2181 server.2=zk2:2888:3888;2181 server.3=zk3:2888:3888;2181
+    volumes:
+      - zk1_data:/data
+      - zk1_logs:/datalog
+
+  zk2:
+    networks:
+      hadoop-net:
+        ipv4_address: 172.30.0.6
+    image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/zookeeper:latest
+    container_name: zk2
+    ports:
+      - "2182:2181"  
+      - "2889:2888"  
+      - "3889:3888"  
+    environment:
+      - ZOO_MY_ID=2
+      - ZOO_SERVERS=server.1=zk1:2888:3888;2181 server.2=zk2:2888:3888;2181 server.3=zk3:2888:3888;2181
+    volumes:
+      - zk2_data:/data
+      - zk2_logs:/datalog
+
+  zk3:
+    networks:
+      hadoop-net:
+        ipv4_address: 172.30.0.7
+    image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/zookeeper:latest
+    container_name: zk3
+    ports:
+      - "2183:2181"  
+      - "2890:2888"  
+      - "3890:3888"  
+    environment:
+      - ZOO_MY_ID=3
+      - ZOO_SERVERS=server.1=zk1:2888:3888;2181 server.2=zk2:2888:3888;2181 server.3=zk3:2888:3888;2181
+    volumes:
+      - zk3_data:/data
+      - zk3_logs:/datalog
+
+  # node1: namenode+zkfc+datanode+journal+rm+nm
+  zmd01:
+    networks:
+      hadoop-net:
+        ipv4_address: 172.30.0.2  # 固定 IP
+    build: .
+    container_name: zmd01
+    ports:
+      - "9870:9870"  # NameNode Web UI
+      - "8088:8088"  # ResourceManager Web UI
+    # env_file:
+      # - .env  
+    environment:
+      - NODE_ROLE=zhaomingdong01
+      - FS_DEFAULTFS=hdfs://mycluster
+      - HADOOP_HTTP_STATICUSER_USER=root
+      - DFS_PERMISSIONS_ENABLED=false
+      - HA_ZOOKEEPER_QUORUM=zk1:2181,zk2:2181,zk3:2181
+      
+      - DFS_NAMESERVICES=mycluster
+      - DFS_HA_NAMENODES_MYCLUSTER=zmd01,zmd02
+      - DFS_NAMENODE_RPC_ADDRESS_MYCLUSTER_ZMD01=zmd01:8020
+      - DFS_NAMENODE_HTTP_ADDRESS_MYCLUSTER_ZMD01=zmd01:9870
+      - DFS_NAMENODE_RPC_ADDRESS_MYCLUSTER_ZMD02=zmd02:8020
+      - DFS_NAMENODE_HTTP_ADDRESS_MYCLUSTER_ZMD02=zmd02:9870
+      - DFS_HA_AUTOMATIC_FAILOVER_ENABLED=true
+      - DFS_CLIENT_FAILOVER_PROXY_PROVIDER_MYCLUSTER=org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider
+      
+      - YARN_RESOURCEMANAGER_HA_ENABLED=true
+      - YARN_RESOURCEMANAGER_CLUSTERS=cluster1
+      - YARN_RESOURCEMANAGER_HA_RM_IDS=rm1,rm2
+      - YARN_RESOURCEMANAGER_HOSTNAME_RM1=zmd01
+      - YARN_RESOURCEMANAGER_HOSTNAME_RM2=zmd02
+      - YARN_RESOURCEMANAGER_WEBAPP_ADDRESS_RM1=zmd01:8088
+      - YARN_RESOURCEMANAGER_WEBAPP_ADDRESS_RM2=zmd02:8088
+      - YARN_RESOURCEMANAGER_ZK_ADDRESS=zk1:2181,zk2:2181,zk3:2181
+      - YARN_RESOURCEMANAGER_OPTS=--add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED
+      - YARN_NODEMANAGER_OPTS=--add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED
+
+
+    command: ["/entrypoint.sh"]
+  
+    volumes:
+      - zmd01_data:/hadoop/dfs/name          # NameNode元数据
+      - zmd01_dn:/hadoop/dfs/data            # DataNode数据块
+      - zmd01_jn:/hadoop/journaldata         # JournalNode日志
+      - zmd01_logs:/opt/hadoop/logs          # 日志目录
+    depends_on:
+      - zk1
+      - zk2
+      - zk3
+
+  # node2: namenode+zkfc+datanode+journal+nm
+  zmd02:
+    networks:
+      hadoop-net:
+        ipv4_address: 172.30.0.3  # 固定 IP
+    build: .
+    container_name: zmd02
+    ports:
+      - "9871:9870"  # 备用NameNode Web UI
+      - "8089:8088"  # 备用ResourceManager Web UI
+    # env_file:
+      # - .env  
+    environment:
+      - NODE_ROLE=zhaomingdong02
+      - FS_DEFAULTFS=hdfs://mycluster
+      - HADOOP_HTTP_STATICUSER_USER=root
+      - DFS_PERMISSIONS_ENABLED=false
+      - HA_ZOOKEEPER_QUORUM=zk1:2181,zk2:2181,zk3:2181
+      
+      - DFS_NAMESERVICES=mycluster
+      - DFS_HA_NAMENODES_MYCLUSTER=zmd01,zmd02
+      - DFS_NAMENODE_RPC_ADDRESS_MYCLUSTER_ZMD01=zmd01:8020
+      - DFS_NAMENODE_HTTP_ADDRESS_MYCLUSTER_ZMD01=zmd01:9870
+      - DFS_NAMENODE_RPC_ADDRESS_MYCLUSTER_ZMD02=zmd02:8020
+      - DFS_NAMENODE_HTTP_ADDRESS_MYCLUSTER_ZMD02=zmd02:9870
+      - DFS_HA_AUTOMATIC_FAILOVER_ENABLED=true
+      - DFS_CLIENT_FAILOVER_PROXY_PROVIDER_MYCLUSTER=org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider
+      
+      - YARN_RESOURCEMANAGER_HA_ENABLED=true
+      - YARN_RESOURCEMANAGER_CLUSTERS=cluster1
+      - YARN_RESOURCEMANAGER_HA_RM_IDS=rm1,rm2
+      - YARN_RESOURCEMANAGER_HOSTNAME_RM1=zmd01
+      - YARN_RESOURCEMANAGER_HOSTNAME_RM2=zmd02
+      - YARN_RESOURCEMANAGER_WEBAPP_ADDRESS_RM1=zmd01:8088
+      - YARN_RESOURCEMANAGER_WEBAPP_ADDRESS_RM2=zmd02:8088
+      - YARN_RESOURCEMANAGER_ZK_ADDRESS=zk1:2181,zk2:2181,zk3:2181
+      - YARN_RESOURCEMANAGER_OPTS=--add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED
+      - YARN_NODEMANAGER_OPTS=--add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED
+  
+    command: ["/entrypoint.sh"]
+    volumes:
+      - zmd02_data:/hadoop/dfs/name          # NameNode元数据
+      - zmd02_dn:/hadoop/dfs/data            # DataNode数据块
+      - zmd02_jn:/hadoop/journaldata         # JournalNode日志
+      - zmd02_logs:/opt/hadoop/logs          # 日志目录
+
+    depends_on:
+      - zk1
+      - zk2
+      - zk3
+      # - zmd01
+
+  # node3: datanode+journal+nm
+  zmd03:
+    networks:
+      hadoop-net:
+        ipv4_address: 172.30.0.4  # 固定 IP
+    build: .
+    container_name: zmd03
+    # env_file:
+      # - .env  
+    environment:
+      - NODE_ROLE=zhaomingdong03
+      - FS_DEFAULTFS=hdfs://mycluster
+      - HADOOP_HTTP_STATICUSER_USER=root
+      - DFS_PERMISSIONS_ENABLED=false
+      - HA_ZOOKEEPER_QUORUM=zk1:2181,zk2:2181,zk3:2181
+      
+      - DFS_NAMESERVICES=mycluster
+      - DFS_HA_NAMENODES_MYCLUSTER=zmd01,zmd02
+      - DFS_NAMENODE_RPC_ADDRESS_MYCLUSTER_ZMD01=zmd01:8020
+      - DFS_NAMENODE_HTTP_ADDRESS_MYCLUSTER_ZMD01=zmd01:9870
+      - DFS_NAMENODE_RPC_ADDRESS_MYCLUSTER_ZMD02=zmd02:8020
+      - DFS_NAMENODE_HTTP_ADDRESS_MYCLUSTER_ZMD02=zmd02:9870
+      - DFS_HA_AUTOMATIC_FAILOVER_ENABLED=true
+      - DFS_CLIENT_FAILOVER_PROXY_PROVIDER_MYCLUSTER=org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider
+      
+      - YARN_RESOURCEMANAGER_HA_ENABLED=true
+      - YARN_RESOURCEMANAGER_CLUSTERS=cluster1
+      - YARN_RESOURCEMANAGER_HA_RM_IDS=rm1,rm2
+      - YARN_RESOURCEMANAGER_HOSTNAME_RM1=zmd01
+      - YARN_RESOURCEMANAGER_HOSTNAME_RM2=zmd02
+      - YARN_RESOURCEMANAGER_WEBAPP_ADDRESS_RM1=zmd01:8088
+      - YARN_RESOURCEMANAGER_WEBAPP_ADDRESS_RM2=zmd02:8088
+      - YARN_RESOURCEMANAGER_ZK_ADDRESS=zk1:2181,zk2:2181,zk3:2181
+      - YARN_RESOURCEMANAGER_OPTS=--add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED
+      - YARN_NODEMANAGER_OPTS=--add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED
+
+    command: ["/entrypoint.sh"]
+    volumes:
+      - zmd03_dn:/hadoop/dfs/data            # DataNode数据块
+      - zmd03_jn:/hadoop/journaldata         # JournalNode日志
+      - zmd03_logs:/opt/hadoop/logs          # 日志目录
+    depends_on:
+      - zk1
+      - zk2
+      - zk3
+      # - zmd01
+      # - zmd02
+
+# 网络配置
+networks:
+  hadoop-net:
+    driver: bridge
+    name: hadoop-net
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24  
+          gateway: 172.30.0.1
+
+# 数据卷配置
+volumes:
+  # ZooKeeper数据卷
+  zk1_data:
+  zk1_logs:
+  zk2_data:
+  zk2_logs:
+  zk3_data:
+  zk3_logs:
+  
+  # NameNode数据卷
+  zmd01_data:
+  zmd02_data:
+  
+  # DataNode数据卷
+  zmd01_dn:
+  zmd02_dn:
+  zmd03_dn:
+  
+  # JournalNode数据卷
+  zmd01_jn:
+  zmd02_jn:
+  zmd03_jn:
+  
+  # 日志数据卷
+  zmd01_logs:
+  zmd02_logs:
+  zmd03_logs:
+
+  

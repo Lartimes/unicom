@@ -29,6 +29,9 @@ import java.io.File;
  */
 @Service
 public class UnicomDriver extends Configured implements Tool {
+    public static void main(String[] args) {
+        UnicomDriver unicomDriver = new UnicomDriver();
+    }
 
     @SneakyThrows
     public int doJob(String[] args) {
