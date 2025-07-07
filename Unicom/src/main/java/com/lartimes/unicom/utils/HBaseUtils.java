@@ -10,8 +10,6 @@ import org.apache.hadoop.hbase.client.BufferedMutator;
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -27,12 +25,12 @@ import java.util.Objects;
  * @description:
  * @since 2025/1/6 22:54
  */
-@Repository
+//@Repository
 public class HBaseUtils {
     private static final byte[] TABLE_NAME = "unicom".getBytes();
     private static final String FAMILY_BASEINFO = "BASEINFO";
     private static final String FAMILY_CONSUME = "CONSUME";
-    @Autowired
+//    @Autowired
     private Connection connection;
 
     //    进行插入 根据行插入

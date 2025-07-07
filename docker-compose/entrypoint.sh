@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-# 创建必要的目录
+
 mkdir -p ${HADOOP_CONF_DIR} ${HADOOP_HOME}/data /hadoop/dfs/{name,data} /hadoop/journaldata
 
 # 生成 core-site.xml
@@ -9,6 +9,10 @@ cat > ${HADOOP_CONF_DIR}/core-site.xml <<EOF
 <?xml version="1.0"?>
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 <configuration>
+  <property>
+    <name>dfs.webhdfs.enabled</name>
+    <value>true</value>
+  </property>
   <property>
     <name>fs.defaultFS</name>
     <value>${FS_DEFAULTFS}</value>
@@ -190,9 +194,14 @@ case "$NODE_ROLE" in
     exit 1
     ;;
 esac
+sleep 5
 
-
-# 根据角色执行不同的启动逻辑
+# 在启动Hadoop客户端的脚本中添加以下JVM参数
+# export HADOOP_OPTS="$HADOOP_OPTS --add-opens java.base/java.lang=ALL-UNNAMED"
+# export HADOOP_OPTS="$HADOOP_OPTS --add-opens java.base/java.io=ALL-UNNAMED"
+# export HADOOP_OPTS="$HADOOP_OPTS --add-opens java.base/java.util=ALL-UNNAMED"
+# export HADOOP_OPTS="$HADOOP_OPTS --add-opens java.base/java.net=ALL-UNNAMED"
+# # 根据角色执行不同的启动逻辑
 case "$NODE_ROLE" in
     zhaomingdong01)
         echo "启动主NameNode节点..."
@@ -206,6 +215,7 @@ case "$NODE_ROLE" in
         ;;
         
     zhaomingdong02)
+        sleep 15
         echo "启动备用NameNode节点..."
         hdfs --daemon start zkfc
         hdfs namenode -bootstrapStandby
@@ -213,7 +223,6 @@ case "$NODE_ROLE" in
         hdfs --daemon start datanode
         yarn --daemon start nodemanager
         ;;
-        
     zhaomingdong03)
         sleep 10
         echo "启动DataNode和JournalNode节点..."
@@ -230,3 +239,5 @@ esac
 
 
 tail -f >> /dev/null
+
+

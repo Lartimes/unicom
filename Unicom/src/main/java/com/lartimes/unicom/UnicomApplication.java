@@ -1,11 +1,10 @@
 package com.lartimes.unicom;
 
 import com.lartimes.unicom.mapreduce.driver.MysqlDBReaderDriverV2;
+import com.lartimes.unicom.mapreduce.driver.UnicomDriver;
 import com.lartimes.unicom.mapreduce.driver.UnicomGroupDriver;
 import com.lartimes.unicom.mapreduce.jobs.UnicomCleanJobs;
-import com.lartimes.unicom.mapreduce.driver.UnicomDriver;
 import com.lartimes.unicom.mapreduce.jobs.UnicomPhoneReplaceJobs;
-import com.lartimes.unicom.utils.HBaseUtils;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -36,8 +35,8 @@ public class UnicomApplication implements ApplicationRunner {
     @Autowired
     private UnicomPhoneReplaceJobs unicomPhoneReplaceJobs;
 
-    @Autowired
-    private HBaseUtils hBaseUtils;
+//    @Autowired
+//    private HBaseUtils hBaseUtils;
 
     @Autowired
     private UnicomGroupDriver unicomGroupDriver;

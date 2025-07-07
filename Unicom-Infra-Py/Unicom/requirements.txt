@@ -1,7 +1,5 @@
-﻿os
-pandas
+﻿pandas
 numpy
 matplotlib
 pymysql
-codecs
 datetime
